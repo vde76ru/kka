@@ -1,0 +1,339 @@
+{
+  "settings": {
+    "number_of_shards": 2,
+    "number_of_replicas": 1,
+    "index.max_result_window": 50000,
+    "index.refresh_interval": "30s",
+    "index.mapping.total_fields.limit": 2000,
+    
+    "analysis": {
+      "normalizer": {
+        "lowercase": {
+          "type": "custom", 
+          "filter": ["lowercase"]
+        },
+        "code_normalizer": {
+          "type": "custom",
+          "filter": ["lowercase", "trim"]
+        }
+      },
+      
+      "char_filter": {
+        "code_cleaner": {
+          "type": "pattern_replace",
+          "pattern": "[\\s\\-\\._/,()\\[\\]]+",
+          "replacement": ""
+        },
+        "dimension_normalizer": {
+          "type": "pattern_replace",
+          "pattern": "([0-9]+)[\\s]*([а-яё]+)",
+          "replacement": "$1$2"
+        },
+        "tech_symbols": {
+          "type": "mapping",
+          "mappings": [
+            "Ø => диаметр",
+            "⌀ => диаметр", 
+            "° => градус",
+            "± => плюсминус",
+            "≤ => меньшеравно",
+            "≥ => большеравно",
+            "× => на"
+          ]
+        }
+      },
+      
+      "tokenizer": {
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20,
+          "token_chars": ["letter", "digit"]
+        },
+        "code_tokenizer": {
+          "type": "pattern",
+          "pattern": "[\\s\\-\\._/,()\\[\\]]+",
+          "group": -1
+        }
+      },
+      
+      "filter": {
+        "russian_stop": {
+          "type": "stop",
+          "stopwords": [
+            "и", "в", "во", "не", "что", "он", "на", "я", "с", "со", "как", "а", "то", "все", "она", "так", "его", "но", "да", "ты", "к", "у", "же", "вы", "за", "бы", "по", "только", "ее", "мне", "было", "вот", "от", "меня", "еще", "нет", "о", "из", "ему", "теперь", "когда", "даже", "ну", "вдруг", "ли", "если", "уже", "или", "ни", "быть", "был", "него", "до", "вас", "нибудь", "опять", "уж", "вам", "ведь", "там", "потом", "себя", "ничего", "ей", "может", "они", "тут", "где", "есть", "надо", "ней", "для", "мы", "тебя", "их", "чем", "была", "сам", "чтоб", "без", "будто", "чего", "раз", "тоже", "себе", "под", "будет", "ж", "тогда", "кто", "этот", "того", "потому", "этого", "какой", "совсем", "ним", "здесь", "этом", "один", "почти", "мой", "тем", "чтобы", "нее", "сейчас", "были", "куда", "зачем", "всех", "никогда", "можно", "при", "наконец", "два", "об", "другой", "хоть", "после", "над", "больше", "тот", "через", "эти", "нас", "про", "всего", "них", "какая", "много", "разве", "три", "эту", "моя", "впрочем", "хорошо", "свою", "этой", "перед", "иногда", "лучше", "чуть", "том", "нельзя", "такой", "им", "более", "всегда", "конечно", "всю", "между"
+          ]
+        },
+        "russian_stemmer": {
+          "type": "stemmer",
+          "language": "russian"
+        },
+        "synonym_filter": {
+          "type": "synonym_graph",
+          "synonyms": [
+            "выключатель,переключатель,switch,коммутатор",
+            "автомат,автоматический выключатель,mcb,ва,автоматич",
+            "розетка,разъем,socket,гнездо",
+            "кабель,провод,cable,wire,жила,кабельный",
+            "щит,щиток,шкаф,panel,бокс,корпус",
+            "лампа,светильник,lamp,light,освещение",
+            "датчик,sensor,сенсор,детектор",
+            "реле,relay,контактор",
+            "трансформатор,transformer,тр,транс",
+            "предохранитель,fuse,плавкий,защита",
+            "изолятор,isolator,изоляция",
+            "заземление,ground,земля,pe",
+            "нуль,ноль,neutral,n",
+            "фаза,phase,l,линия",
+            "напряжение,voltage,вольт,v,в",
+            "ток,current,ампер,a,а",
+            "мощность,power,ватт,w,вт,квт",
+            "частота,frequency,hz,гц",
+            "сопротивление,resistance,ом,ohm",
+            "конденсатор,capacitor,емкость",
+            "резистор,resistor,сопротивление",
+            "диод,diode,led,светодиод",
+            "транзистор,transistor",
+            "микросхема,chip,ic,схема",
+            "плата,board,pcb,печатная",
+            "корпус,case,housing,оболочка",
+            "клемма,terminal,зажим,контакт",
+            "муфта,coupling,соединение",
+            "гильза,sleeve,наконечник",
+            "хомут,clamp,стяжка",
+            "труба,pipe,гофра,рукав",
+            "короб,box,лоток,канал",
+            "стойка,rack,шкаф,стеллаж",
+            "блок,block,модуль,unit",
+            "панель,panel,пластина",
+            "крепеж,mounting,крепление,фиксатор",
+            "ip20,ip44,ip54,ip65,ip67,степень защиты",
+            "din,дин,стандарт",
+            "гост,ост,ту,технические условия"
+          ]
+        },
+        "edge_ngram_filter": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20
+        },
+        "tech_units_filter": {
+          "type": "pattern_replace",
+          "pattern": "([0-9]+)[\\s]*(мм|см|м|кг|г|в|вольт|а|ампер|вт|ватт|квт|гц|герц|ом|мкф|пф|нф)",
+          "replacement": "$1$2"
+        }
+      },
+      
+      "analyzer": {
+        "text_analyzer": {
+          "tokenizer": "standard",
+          "char_filter": ["tech_symbols", "dimension_normalizer"],
+          "filter": [
+            "lowercase", 
+            "russian_stop", 
+            "synonym_filter",
+            "russian_stemmer",
+            "tech_units_filter"
+          ]
+        },
+        
+        "code_analyzer": {
+          "tokenizer": "code_tokenizer",
+          "char_filter": ["code_cleaner"],
+          "filter": ["lowercase"]
+        },
+        
+        "autocomplete_analyzer": {
+          "tokenizer": "edge_ngram_tokenizer", 
+          "char_filter": ["tech_symbols"],
+          "filter": ["lowercase"]
+        },
+        
+        "exact_analyzer": {
+          "tokenizer": "keyword",
+          "filter": ["lowercase", "trim"]
+        },
+        
+        "search_analyzer": {
+          "tokenizer": "standard",
+          "char_filter": ["tech_symbols", "dimension_normalizer"],
+          "filter": [
+            "lowercase",
+            "russian_stop",
+            "synonym_filter",
+            "tech_units_filter"
+          ]
+        }
+      }
+    }
+  },
+  
+  "mappings": {
+    "properties": {
+      "product_id": {"type": "long"},
+      
+      "name": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "search_analyzer": "search_analyzer",
+        "fields": {
+          "keyword": {"type": "keyword"},
+          "exact": {"type": "text", "analyzer": "exact_analyzer"},
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer",
+            "search_analyzer": "search_analyzer"
+          },
+          "raw": {"type": "keyword", "normalizer": "lowercase"}
+        }
+      },
+      
+      "external_id": {
+        "type": "text",
+        "analyzer": "code_analyzer",
+        "fields": {
+          "keyword": {"type": "keyword", "normalizer": "code_normalizer"},
+          "exact": {"type": "keyword"},
+          "prefix": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer", 
+            "search_analyzer": "exact_analyzer"
+          },
+          "raw": {"type": "text", "analyzer": "exact_analyzer"}
+        }
+      },
+      
+      "sku": {
+        "type": "text",
+        "analyzer": "code_analyzer",
+        "fields": {
+          "keyword": {"type": "keyword", "normalizer": "code_normalizer"},
+          "exact": {"type": "keyword"},
+          "prefix": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer",
+            "search_analyzer": "exact_analyzer"
+          }
+        }
+      },
+      
+      "description": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "search_analyzer": "search_analyzer"
+      },
+      
+      "brand_name": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "search_analyzer": "search_analyzer",
+        "fields": {
+          "keyword": {"type": "keyword"},
+          "exact": {"type": "keyword", "normalizer": "lowercase"},
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "autocomplete_analyzer",
+            "search_analyzer": "search_analyzer"
+          }
+        }
+      },
+      
+      "series_name": {
+        "type": "text", 
+        "analyzer": "text_analyzer",
+        "search_analyzer": "search_analyzer",
+        "fields": {
+          "keyword": {"type": "keyword"},
+          "exact": {"type": "keyword", "normalizer": "lowercase"}
+        }
+      },
+      
+      "search_text": {
+        "type": "text",
+        "analyzer": "text_analyzer",
+        "search_analyzer": "search_analyzer"
+      },
+      
+      "categories": {
+        "type": "text", 
+        "analyzer": "text_analyzer",
+        "search_analyzer": "search_analyzer"
+      },
+      "category_ids": {"type": "integer"},
+      "unit": {"type": "keyword", "normalizer": "lowercase"},
+      "min_sale": {"type": "integer"},
+      "weight": {"type": "float"},
+      "brand_id": {"type": "integer"},
+      "series_id": {"type": "integer"},
+      "images": {"type": "keyword"},
+      "popularity_score": {"type": "float"},
+      "total_stock": {"type": "integer"},
+      "cities_available": {"type": "integer"},
+      "has_stock": {"type": "boolean"},
+      "has_images": {"type": "boolean"},
+      "has_description": {"type": "boolean"},
+      "created_at": {"type": "date"},
+      "updated_at": {"type": "date"},
+      
+      "documents": {
+        "type": "object",
+        "properties": {
+          "certificates": {"type": "integer"},
+          "manuals": {"type": "integer"},
+          "drawings": {"type": "integer"}
+        }
+      },
+      
+      "attributes": {
+        "type": "nested",
+        "properties": {
+          "name": {"type": "keyword", "normalizer": "lowercase"},
+          "value": {
+            "type": "text",
+            "analyzer": "text_analyzer",
+            "search_analyzer": "search_analyzer",
+            "fields": {
+              "keyword": {"type": "keyword", "normalizer": "lowercase"},
+              "exact": {"type": "keyword"},
+              "numeric": {
+                "type": "text",
+                "analyzer": "exact_analyzer"
+              }
+            }
+          },
+          "unit": {"type": "keyword", "normalizer": "lowercase"}
+        }
+      },
+      
+      "numeric_props": {
+        "type": "nested",
+        "properties": {
+          "name": {"type": "keyword", "normalizer": "lowercase"},
+          "value": {"type": "float"},
+          "unit": {"type": "keyword", "normalizer": "lowercase"},
+          "min_value": {"type": "float"},
+          "max_value": {"type": "float"}
+        }
+      },
+      
+      "suggest": {
+        "type": "completion",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer": "search_analyzer",
+        "max_input_length": 100,
+        "preserve_separators": false,
+        "preserve_position_increments": false,
+        "contexts": [
+          {
+            "name": "category",
+            "type": "category"
+          },
+          {
+            "name": "brand", 
+            "type": "category"
+          }
+        ]
+      }
+    }
+  }
+}
